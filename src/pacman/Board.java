@@ -8,13 +8,14 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
+import java.awt.Toolkit;
 import javax.swing.JPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class Board extends JPanel implements ActionListener{ 
+public class Board extends JPanel implements ActionListener, Level{ 
     int blocksize_w;
     int blocksize_h;
     final int nblocks = 15;
@@ -23,6 +24,7 @@ public class Board extends JPanel implements ActionListener{
     short[] screen;
     Color wall;
     Color dot;
+    boolean running;
       
 
 
@@ -36,6 +38,7 @@ public class Board extends JPanel implements ActionListener{
         setFocusable(true);
         setBackground(Color.BLACK);
         setDoubleBuffered(true);
+        running = false;
     
     }
     @Override
@@ -48,13 +51,18 @@ public class Board extends JPanel implements ActionListener{
         g2d.fillRect(0, 0,this.getWidth(),this.getHeight());
         
         DrawWalls(g2d);
-        FirstScreen(g2d);
-        System.out.println(scrsize_w);
+        if(running){
+            System.out.println("run");}
+        else{
+        FirstScreen(g2d);}
+        Toolkit.getDefaultToolkit().sync();
+        //System.out.println(scrsize_w);
+        System.out.println(scrsize_h);
         //PlayGame(g2d);
     }
 public void update_block(){
     blocksize_w=this.getWidth()/15;
-    blocksize_h=this.getWidth()/15;
+    blocksize_h=this.getHeight()/15;
     scrsize_w= nblocks * blocksize_w;
     scrsize_h= nblocks * blocksize_h;
     
@@ -70,8 +78,15 @@ public void FirstScreen(Graphics2D g2d) {
         g2d.drawString(s, (this.getWidth() - metr.stringWidth(s)) / 2,this.getHeight()  / 2);
     }
 public void Init(){
+    LoadMap();
 
 }
+public void LoadMap() {
+        int i;
+        for (i = 0; i < nblocks * nblocks; i++)
+            screen[i] = leveldata[i];
+        
+    }
 public void DrawWalls(Graphics2D g2d) {
         short i = 0;
         int x, y;
@@ -114,14 +129,15 @@ class TAdapter extends KeyAdapter {
         public void keyPressed(KeyEvent e) {
 
           int key = e.getKeyCode();
-
-         if (key == KeyEvent.VK_LEFT)
+if (running)
+          {
+            if (key == KeyEvent.VK_LEFT)
             {
-            
+             
             }
             else if (key == KeyEvent.VK_RIGHT)
             {
-              
+            
             }
             else if (key == KeyEvent.VK_UP)
             {
@@ -133,14 +149,21 @@ class TAdapter extends KeyAdapter {
             }
             else if (key == KeyEvent.VK_ESCAPE)
             {
-             
+              running=false;
             }
             else if (key == KeyEvent.VK_PAUSE) {
-               
-            }     
-            else if (key == KeyEvent.VK_ENTER)
-                Init();
-          
+             
+            }
+          }
+          else
+          {
+            if (key == KeyEvent.VK_ENTER)
+          {
+              running=true;             
+              Init();
+              repaint();
+            }
+          }
       }
 @Override
           public void keyReleased(KeyEvent e) {
@@ -156,7 +179,7 @@ class TAdapter extends KeyAdapter {
 }
 @Override
     public void actionPerformed(ActionEvent e) {
-       // repaint();  
+        repaint();  
   
     }
 
